@@ -5,6 +5,7 @@
 #include<string.h>
 #include<errno.h>
 time_t tt;
+void money();
 void new_acc();
 void increment();
 int acc_no = 0;
@@ -176,26 +177,10 @@ void deposit() {
 
 
 void money() {    // integer 1234567 to string 1,234,567
-	
-
-
-
+	return;
 
 }
-void increment(char i_id[])
-{
-    int l;
-    l=strlen(i_id)-1;
-    do
-    {
-        if(i_id[l]!='9') i_id[l]+=1;
-        else i_id[l]='0';
-        l--;
 
-    }while(i_id[l+1]=='0');
-
-
-}
 
 int check_date(char *date) {      
 	int i = 0,  d, m , y;
