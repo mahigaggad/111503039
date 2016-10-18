@@ -4,7 +4,7 @@
 /*#include<ncurses.h>*/
 #include<string.h>
 #include<errno.h>
-void deposit();
+time_t tt;
 void new_acc();
 void increment();
 int acc_no = 0;
@@ -14,7 +14,7 @@ char* sys_time();
 
 typedef struct account {
 	char firstname[20], lastname[20];   //take first and last name seperately
-	char acc_no[10];
+	long acc_no;
 	char *date;
 	char addr[60];
 	char contact[15];
@@ -44,14 +44,19 @@ void new_acc() {
 	account acc;
 	char ch;
 	int i;
+	long n;
 	FILE *fp1, *fp;
 	fp = fopen("data.dat", "r");
-	if(fp == NULL)
-		strcpy(acc.acc_no, "0000000001");
-	else {
-		while(fscanf(fp, " %s %s %s %s %s %s %lf %c %c %s %f\n", acc.firstname, acc.lastname, acc.acc_no, acc.date, acc.addr, acc.contact, &acc.balance, &acc.acc_typ, &acc.sex, acc.dob, &acc.RoI) != EOF);
-		increment(acc.acc_no);
-	} 
+	random:
+	n = random() % 100000000;
+	if (fp == NULL)
+		acc.acc_no = n;
+	else
+		while(fscanf(fp, " %s %s %ld %s %s %s %lf %c %c %s %f\n", acc.firstname, acc.lastname, &acc.acc_no, acc.date, acc.addr, acc.contact, &acc.balance, &acc.acc_typ, &acc.sex, acc.dob, &acc.RoI) != EOF) {
+			if( n == acc.acc_no)
+				goto random;
+			else acc.acc_no = n; 
+		} 	
 	personal:		
 	system("clear");
 	printf("PERSONAL DETAILS:\n");
@@ -99,7 +104,7 @@ void new_acc() {
 	account:
 	system("clear");
 	printf("ACCOUNT DETAILS\n");
-	printf("\nA/C number	:	%s", acc.acc_no);
+	printf("\nA/C number	:	%ld", acc.acc_no);
 	acctype:
 	printf("\nA/C type <S/C>	:	");
 	scanf("\n %c", &acc.acc_typ);
@@ -135,7 +140,7 @@ void new_acc() {
 	store:
 	system("clear");
 	fp=fopen("data.dat","a");
-	fprintf(fp,"%s %s %s %s %s %s %c %s %c %.2f %.2f\n",acc.acc_no,acc.firstname,acc.lastname,acc.dob,acc.addr,acc.contact,acc.sex,acc.date,acc.acc_typ,acc.balance, acc.RoI);
+	fprintf(fp,"%ld %s %s %s %s %s %c %s %c %.2f %.2f\n",acc.acc_no,acc.firstname,acc.lastname,acc.dob,acc.addr,acc.contact,acc.sex,acc.date,acc.acc_typ,acc.balance, acc.RoI);
         fclose(fp);
 	printf("Account added succesfully!");	
 }
@@ -143,15 +148,15 @@ void new_acc() {
 void deposit() {
 	account acc;
 	FILE *fp, *fp1;
-	char ac_no[10], *name, temp[50];
-	name = (char*)malloc(50);
+	char name[50], temp[50];
 	int i;
+	long ac_no;
 	float amount;
 	printf("\nDeposit to Account Number	:	");
-	scanf("%s", ac_no);
+	scanf("%ld", &ac_no);
 	fp = fopen("data.dat", "r");
-	while(fscanf(fp, " %s %s %s %s %s %s %lf %c %c %s %f\n", acc.firstname, acc.lastname, acc.acc_no, acc.date, acc.addr, acc.contact, &acc.balance, &acc.acc_typ, &acc.sex, acc.dob, &acc.RoI) != EOF) {
-		if (strcmp(ac_no, acc.acc_no) == 0) {
+	while(fscanf(fp, " %s %s %ld %s %s %s %lf %c %c %s %f\n", acc.firstname, acc.lastname, &acc.acc_no, acc.date, acc.addr, acc.contact, &acc.balance, &acc.acc_typ, &acc.sex, acc.dob, &acc.RoI) != EOF) {
+		if (ac_no == acc.acc_no) {
 			i++;
 			strcpy(name, acc.firstname);
 			strcat(name, " ");
@@ -160,29 +165,38 @@ void deposit() {
 	fclose(fp);
 	if(i == 0)
 		printf("\nINVALID ACCOUNT NUMBER. No such account exists.");
-	printf("\nACCOUNT HOLDER	:	[ %S ]", name);
+	printf("\nACCOUNT HOLDER	:	[ %s ]", name);
 	printf("\nEnter amount to b Deposited (Rs.)	:	");
 	scanf("%f", &amount);
-	
-}
+	}
 }		
 
 		
 			
 
-	 
+
+void money() {    // integer 1234567 to string 1,234,567
 	
-void increment(char *str) {
-	int l;
-	l = strlen(str);
-	do {
-		if(str[l-1] != '9')
-			str[l-1]++;
-		else 
-			str[l-1] = '0';
-		l--;
-	} while(str[l] == '0');
+
+
+
+
 }
+void increment(char i_id[])
+{
+    int l;
+    l=strlen(i_id)-1;
+    do
+    {
+        if(i_id[l]!='9') i_id[l]+=1;
+        else i_id[l]='0';
+        l--;
+
+    }while(i_id[l+1]=='0');
+
+
+}
+
 int check_date(char *date) {      
 	int i = 0,  d, m , y;
    	if(strlen(date) != 10) 
@@ -262,7 +276,7 @@ char* sys_date() {
    	struct tm *loc_time;
    	curtime = time (NULL);
    	loc_time = localtime (&curtime);
-	strftime (buf2, 20, "%d/%m/%Y\n", loc_time);
+	strftime (buf2, 150, "%d/%m/%Y\n", loc_time);
 	return buf2;
 }
 char* sys_time() {
@@ -272,12 +286,13 @@ char* sys_time() {
    	struct tm *loc_time;
    	curtime = time (NULL);
    	loc_time = localtime (&curtime);
-	strftime (buf1, 11, "Time is %I:%M %p.\n", loc_time);
+	strftime (buf1, 150, "Time is %I:%M %p.\n", loc_time);
 	return buf1;
 }
 void main() {
 	/*printf("%s", sys_date());
 	printf("%s", sys_time());*/
+	srandom(time(&tt));
 	new_acc();
 	return;
 }
