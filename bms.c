@@ -3,15 +3,21 @@
 #include<time.h>
 /*#include<ncurses.h>*/
 #include<string.h>
+#include<strings.h>
 #include<errno.h>
+#include<ctype.h>
+
 time_t tt;
-void money();
-void new_acc();
-void increment();
 int acc_no = 0;
+
+void password();
+void new_acc();
 int check_date(char *);
 char* sys_date();
 char* sys_time();
+void member();
+
+FILE *fp, *fp1;
 
 typedef struct account {
 	char firstname[20], lastname[20];   //take first and last name seperately
@@ -25,28 +31,68 @@ typedef struct account {
 	char dob[15];
 	float RoI; // rate of interest
 	
-	/*struct date dob;
-	struct date last_deposit;
-	struct date last_withdraw;
-	struct date new;*/
 }account;
-account add_acc, del_acc, updte_acc, transact, temp;
+
 typedef struct log{
 	char usrid[10];
 	char name[50];
 	char date[15];
 	char intime[12]; //log in time
 	char outtime[12]; // log out time
+
 }usr_log;
+
 /*typedef struct transact{*/
 
+typedef struct user {
+	int usrid;
+	char name[30], passwd[25];
+
+}user;
+
+void member() {
+	int i, j = 0, id;
+	char pass[30] = {0};
+	user us;
+	do {
+		system("clear");
+		printf("Only three attempts allowed:\n");
+		printf("\nEnter user name	:	");
+		scanf("%s", us.name);
+		printf("\nPassword	:	");
+		scanf("%s", us.passwd);
+		i++;
+		if(i == 3) {
+			printf("\nInvalid User name or Password!");	
+			printf("Press ENTER to exit the program...");
+			getchar();
+			exit(0);
+		}	
+		char name[50];
+		fp = fopen("user.dat", "r");
+		while(fscanf(fp,"%d %s %s\n",&id,name,pass)!=EOF) {
+			if((strcasecmp(us.name,name)==0)&&(strcasecmp(us.passwd,pass)==0)) {
+ 			j++;
+			us.usrid = id;
+			}
+		}
+		fclose(fp);
+		if(j == 0)  {
+			printf("\nNO SUCH USER EXISTS!");
+			getchar();
+		}
+		else
+			break;
+	}while(1);
+
+	return;
+}
 
 void new_acc() {
 	account acc;
 	char ch;
 	int i;
 	long n;
-	FILE *fp1, *fp;
 	fp = fopen("data.dat", "r");
 	random:
 	n = random() % 100000000;
@@ -170,17 +216,19 @@ void deposit() {
 	printf("\nEnter amount to b Deposited (Rs.)	:	");
 	scanf("%f", &amount);
 	}
-}		
+} // function not complete.		
 
 		
 			
 
 
 void money() {    // integer 1234567 to string 1,234,567
-	return;
+	
+
+
+
 
 }
-
 
 int check_date(char *date) {      
 	int i = 0,  d, m , y;
@@ -278,6 +326,7 @@ void main() {
 	/*printf("%s", sys_date());
 	printf("%s", sys_time());*/
 	srandom(time(&tt));
-	new_acc();
+	//new_acc();
+	//member();
 	return;
 }
